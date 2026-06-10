@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="es" id="html-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mela Meliton — Productor de Eventos y Contenidos</title>
+  <meta property="og:title" content="Mela Meliton — Productor de Eventos y Contenidos" />
+  <meta property="og:description" content="20+ años produciendo eventos, experiencias y contenido en Europa y LATAM." />
+  <meta property="og:url" content="https://melamelitonproductor.pages.dev/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Mela Meliton — Productor de Eventos y Contenidos" />
+  <meta name="twitter:description" content="20+ años produciendo eventos, experiencias y contenido en Europa y LATAM." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Space+Grotesk:wght@400;700;900&family=Syne:wght@400;700;800&family=DM+Sans:wght@400;700;900&family=Outfit:wght@400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <style>
+    /* ─────────────────────────────────────────
+       TOKENS
+    ───────────────────────────────────────── */
+    :root {
+      --black:   #0A0A0A;
+      --white:   #FFFFFF;
+      --bg:      #F5F5F5;
+      --border:  #E0E0E0;
+      --text:    #0A0A0A;
+      --muted:   #777;
+      --accent:  #C9B99A;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { font-family: 'Outfit', sans-serif; }
+    a { text-decoration: none; color: inherit; }
+    img { display: block; max-width: 100%; }
+
+    /* ─────────────────────────────────────────
+       GIF BACKGROUND — fixed, B&W + dimmed
+    ───────────────────────────────────────── */
+    #gif-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+    #gif-bg img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center;
+      filter: brightness(0.58);
+      display: block;
+    }
+
+    /* ─────────────────────────────────────────
+       SCROLL CONTAINER
+    ───────────────────────────────────────── */
+    #scroll-wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─────────────────────────────────────────
+       SLIDES
+    ───────────────────────────────────────── */
+    .slide {
+      min-height: 100vh;
+      width: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slide--dark  { background: rgba(8,8,8,.76);       color: var(--white); }
+    .slide--light { background: rgba(245,245,245,.86);  color: var(--text);  }
+
+    /* ─────────────────────────────────────────
+       NAV
+    ───────────────────────────────────────── */
+    #navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 48px;
+      transition: color .3s;
+    }
+    .nav-logo {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: var(--white);
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-contact {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--white); opacity: .7;
+      transition: opacity .2s; cursor: pointer;
+    }
+    .nav-contact:hover { opacity: 1; }
+    #navbar.light .nav-logo,
+    #navbar.light .nav-contact { color: var(--black); }
+
+    /* ─────────────────────────────────────────
+       LANGUAGE TOGGLE
+    ───────────────────────────────────────── */
+    #lang-toggle {
+      position: fixed;
+      top: 22px;
+      right: 48px;
+      z-index: 101;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .lang-btn {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      padding: 5px 9px;
+      cursor: pointer;
+      color: rgba(255,255,255,.28);
+      transition: color .2s;
+      background: none;
+      border: none;
+      font-family: 'Outfit', sans-serif;
+    }
+    .lang-btn:hover { color: rgba(255,255,255,.6); }
+    .lang-btn.active { color: var(--white); }
+    .lang-sep {
+      font-size: 10px;
+      color: rgba(255,255,255,.15);
+      user-select: none;
+    }
+
+    /* ─────────────────────────────────────────
+       DOT NAV
+    ───────────────────────────────────────── */
+    #slide-dots {
+      position: fixed; right: 28px; top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(255,255,255,.3);
+      cursor: pointer;
+      transition: background .3s, transform .3s;
+    }
+    .dot.active { background: var(--white); transform: scale(1.5); }
+    #slide-dots.dark-dots .dot { background: rgba(0,0,0,.2); }
+    #slide-dots.dark-dots .dot.active { background: var(--black); }
+
+    /* COUNTER — hidden */
+    #slide-counter { display: none; }
+
+    /* ─────────────────────────────────────────
+       FADE-UP
+    ───────────────────────────────────────── */
+    .fu { opacity:0; transform:translateY(24px); transition:opacity .7s ease,transform .7s ease; }
+    .fu.visible { opacity:1; transform:translateY(0); }
+    .d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}
+    .d4{transition-delay:.32s}.d5{transition-delay:.40s}.d6{transition-delay:.48s}
+
+    /* ─────────────────────────────────────────
+       SHARED: SECTION LABEL
+    ───────────────────────────────────────── */
+    .section-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--accent);
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 36px; flex-shrink: 0;
+    }
+    .section-label::after {
+      content: ''; flex: 0 0 48px; height: 1px;
+      background: currentColor; opacity: .3;
+    }
+
+    /* ─────────────────────────────────────────
+       SLIDE 1 — HERO
+    ───────────────────────────────────────── */
+    .hero-inner {
+      width: 100%; max-width: 1200px; padding: 0 80px;
+      display: flex; align-items: flex-end; justify-content: space-between; gap: 60px;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 24px;
+    }
+    .hero-tag::before {
+      content: ''; display: block;
+      width: 20px; height: 1px; background: var(--accent);
+    }
+    .hero-name {
+      font-size: clamp(52px,7vw,96px); font-weight: 900;
+      letter-spacing: -.04em; line-height: .92;
+      color: var(--white); margin-bottom: 28px;
+    }
+    .hero-name span { color: var(--accent); }
+    .hero-profession {
+      font-size: clamp(18px, 2.4vw, 30px); font-weight: 600;
+      color: rgba(255,255,255,.80);
+      letter-spacing: .01em; line-height: 1.3;
+      max-width: 500px; margin-bottom: 40px;
+    }
+    .hero-location {
+      display: flex; align-items: center; gap: 20px;
+      font-size: 11px; font-weight: 500;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: rgba(255,255,255,.35);
+    }
+    .hero-location .dot-sep { width:3px;height:3px;border-radius:50%;background:var(--accent); }
+    .hero-location strong { color: rgba(255,255,255,.7); }
+    .hero-photo-wrap {
+      position: relative;
+      width: clamp(216px, 20.4vw, 288px);
+      aspect-ratio: 1/1;
+      flex-shrink: 0;
+      margin-bottom: 100px;
+      margin-right: 110px;
+    }
+    .hero-photo {
+      position: relative; z-index: 1;
+      width: 100%; height: 100%;
+      object-fit: contain; object-position: bottom center;
+      filter: contrast(1.05);
+    }
+    .hero-photo-placeholder {
+      position: relative; z-index: 1; width: 100%; height: 100%;
+      background: rgba(255,255,255,.05); border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,.15); font-size: 12px;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+
+    /* ─────────────────────────────────────────
+       SLIDE 2 — EXPERTISE
+    ───────────────────────────────────────── */
+    .expertise-inner { width: 100%; max-width: 1200px; padding: 0 80px; }
+
+    .expertise-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+
+    .expertise-item { padding: 44px 40px; }
+
+    .expertise-item:nth-child(3n+1) { padding-left: 0; border-right: 1px solid rgba(255,255,255,.08); }
+    .expertise-item:nth-child(3n+2) { border-right: 1px solid rgba(255,255,255,.08); }
+    .expertise-item:nth-child(3n)   { padding-right: 0; }
+    .expertise-item:nth-child(-n+3) { border-bottom: 1px solid rgba(255,255,255,.08); }
+
+    .exp-bullet {
+      font-size: 8px;
+      color: var(--accent);
+      display: block;
+      margin-bottom: 14px;
+      letter-spacing: 0;
+    }
+
+    .expertise-title {
+      font-size: clamp(22px, 2.8vw, 36px);
+      font-weight: 900;
+      letter-spacing: -.04em;
+      color: var(--white);
+      line-height: .95;
+      margin-bottom: 14px;
+    }
+    .expertise-title span { color: var(--accent); }
+
+    .expertise-tags {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.72);
+      line-height: 2;
+    }
+
+    /* ─────────────────────────────────────────
+       SLIDE 3 — SKILLS
+    ───────────────────────────────────────── */
+    .skills-inner { width: 100%; max-width: 1200px; padding: 0 80px; }
+
+    .sk-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .sk-item { padding: 44px 40px; }
+
+    .sk-item:nth-child(3n+1) { padding-left: 0; border-right: 1px solid rgba(255,255,255,.08); }
+    .sk-item:nth-child(3n+2) { border-right: 1px solid rgba(255,255,255,.08); }
+    .sk-item:nth-child(3n)   { padding-right: 0; }
+    .sk-item:nth-child(-n+3) { border-bottom: 1px solid rgba(255,255,255,.08); }
+
+    .sk-name {
+      font-size: clamp(22px, 2.8vw, 36px);
+      font-weight: 900;
+      letter-spacing: -.04em;
+      color: var(--white);
+      line-height: .95;
+      margin-bottom: 14px;
+    }
+    .sk-name span { color: var(--accent); }
+
+    .sk-tags {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.72);
+      line-height: 2;
+    }
+    .sk-tags-list {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.72);
+      line-height: 1.9;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sk-tags-list span {
+      display: block;
+    }
+
+    /* ─────────────────────────────────────────
+       SLIDE 5 — TRAYECTORIA (acordeón)
+    ───────────────────────────────────────── */
+    #s3 { align-items: flex-start; }
+
+    .trayec-inner {
+      width: 100%; max-width: 1200px; padding: 0 80px;
+      display: flex; flex-direction: column;
+    }
+
+    .trayec-scroll {
+      padding-bottom: 60px;
+    }
+
+    .accord-item {
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      cursor: pointer;
+    }
+    .accord-item:first-child { border-top: 1px solid rgba(255,255,255,.08); }
+
+    .accord-header {
+      display: grid;
+      grid-template-columns: 130px 1fr auto;
+      gap: 28px;
+      padding: 20px 0;
+      align-items: center;
+      user-select: none;
+      transition: opacity .2s;
+    }
+    .accord-header:hover { opacity: .75; }
+
+    .accord-dates {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: .08em; color: rgba(255,255,255,.35);
+      white-space: nowrap;
+    }
+    .accord-role {
+      font-size: clamp(13px,1.3vw,16px); font-weight: 700;
+      color: var(--white); letter-spacing: -.01em; margin-bottom: 2px;
+    }
+    .accord-company {
+      font-size: 11.5px; color: rgba(255,255,255,.72); letter-spacing: .03em;
+    }
+    .accord-chevron {
+      font-size: 11px; color: var(--accent);
+      transition: transform .3s; flex-shrink: 0;
+    }
+    .accord-item.open .accord-chevron { transform: rotate(180deg); }
+
+    .accord-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .4s ease;
+      padding-left: 158px;
+    }
+    .accord-item.open .accord-body { max-height: 400px; }
+
+    .accord-list {
+      list-style: none;
+      padding-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .accord-list li {
+      font-size: 12.5px;
+      color: rgba(255,255,255,.72);
+      line-height: 1.55;
+      padding-left: 14px;
+      position: relative;
+    }
+    .accord-list li::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 8px;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    /* ─────────────────────────────────────────
+       SLIDE 4 — SKILLS + CONTACTO
+    ───────────────────────────────────────── */
+    /* ── S4 SKILLS ── */
+    #s4 { align-items: flex-start; }
+
+    .s4-inner {
+      width: 100%; max-width: 1200px; padding: 0 80px;
+      display: flex; flex-direction: column;
+    }
+
+    .s4-scroll {
+      padding-bottom: 60px;
+    }
+
+    .sc-divider {
+      height: 1px; background: rgba(255,255,255,.08);
+      margin: 40px 0;
+    }
+    .sc-contact {
+      display: flex; flex-direction: column; gap: 0;
+    }
+
+    /* ─────────────────────────────────────────
+       CONTACTO
+    ───────────────────────────────────────── */
+    .contact-inner {
+      width:100%;max-width:1200px;padding:0 80px;
+      display:flex;flex-direction:column;gap:40px;
+    }
+    .contact-tag { font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent); }
+    .contact-headline { font-size:clamp(36px,5vw,68px);font-weight:900;letter-spacing:-.04em;color:var(--white);line-height:1;max-width:700px; }
+    .contact-links { display:flex;flex-direction:column;gap:16px; }
+    .contact-link {
+      display:inline-flex;align-items:center;gap:14px;
+      font-size:clamp(14px,1.6vw,18px);font-weight:500;
+      color:rgba(255,255,255,.5);transition:color .2s;
+    }
+    .contact-link:hover { color:var(--white); }
+    .contact-link::before { content:'→';color:var(--accent);font-size:14px; }
+    .contact-availability {
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;
+      color:rgba(255,255,255,.25);margin-top:8px;
+    }
+    .avail-dot {
+      width:6px;height:6px;border-radius:50%;
+      background:#2ECC71;box-shadow:0 0 8px rgba(46,204,113,.6);
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+    .contact-footer {
+      position:absolute;bottom:28px;left:80px;right:80px;
+      display:flex;justify-content:space-between;
+    }
+    .contact-footer-name { font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.15); }
+    .contact-footer-copy { font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.1); }
+
+    /* ─────────────────────────────────────────
+       CURSOR GLOW
+    ───────────────────────────────────────── */
+
+    /* ─────────────────────────────────────────
+       MOBILE
+    ───────────────────────────────────────── */
+    @media (max-width: 768px) {
+      #navbar { padding: 20px 24px; }
+      #lang-toggle { right: 24px; top: 18px; }
+      #slide-dots { right: 14px; }
+      #slide-counter { left: 24px; bottom: 20px; }
+
+      .hero-inner { position: static; flex-direction: column; padding: 0 24px; padding-top: 80px; padding-bottom: 40px; gap: 12px; align-items: center; justify-content: center; }
+      .hero-photo-wrap { order: -1; position: static; width: 35vw; aspect-ratio: 1/1; margin: 0 auto 8px; }
+      .hero-text { text-align: center; width: 100%; }
+      .hero-name { font-size:clamp(40px,13vw,58px); }
+
+      #s2 { align-items: flex-start; height: auto; min-height: 100vh; padding: 80px 0 60px; }
+      .expertise-inner { padding: 0 24px; }
+      .expertise-grid  { grid-template-columns: 1fr; }
+      .expertise-item  { padding: 20px 0 !important; border-right: none !important; border-bottom: 1px solid rgba(255,255,255,.08) !important; }
+      .expertise-item:last-child { border-bottom: none !important; }
+      .expertise-title { font-size: clamp(22px, 6vw, 28px) !important; }
+      .expertise-tags  { font-size: 11px !important; }
+
+      .skills-inner { padding: 0 24px; overflow-y: auto; max-height: 100vh; }
+      .sk-grid { grid-template-columns: 1fr; width: 100%; }
+      .sk-item {
+        padding: 20px 0 !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255,255,255,.08) !important;
+      }
+      .sk-item:last-child { border-bottom: none !important; }
+      .sk-name { font-size: clamp(22px, 6vw, 28px) !important; }
+      .sk-tags { font-size: 11px !important; }
+
+      .trayec-inner { padding:0 24px; }
+      .accord-header { grid-template-columns:80px 1fr auto;gap:14px;padding:16px 0; }
+      .accord-body   { padding-left:94px; }
+
+      .contact-inner  { padding:0 24px; }
+      .contact-footer { left:24px;right:24px; }
+
+      .s4-inner { padding: 0 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="gif-bg">
+  <img src="gifs/kenburns_prueba.gif" alt="" />
+</div>
+
+
+<nav id="navbar">
+  <div class="nav-logo" style="display:none;"></div>
+  <div class="nav-contact" style="display:none;"></div>
+</nav>
+
+<!-- Language toggle -->
+<div id="lang-toggle">
+  <button class="lang-btn active" id="btn-es" onclick="setLang('es')">ES</button>
+  <span class="lang-sep">/</span>
+  <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+</div>
+
+<div id="slide-dots">
+  <div class="dot active" onclick="goTo(0)"></div>
+  <div class="dot" onclick="goTo(1)"></div>
+  <div class="dot" onclick="goTo(2)"></div>
+  <div class="dot" onclick="goTo(3)"></div>
+</div>
+
+<div id="slide-counter">01 / 04</div>
+
+<div id="scroll-wrap">
+
+  <!-- ── S1: HERO (dark) ── -->
+  <section class="slide slide--dark" id="s1">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <h1 class="hero-name fu">Mela<br/><span>Melitón</span></h1>
+        <p class="hero-profession fu d1" data-i18n="hero.profession">
+          Productor. Eventos y Contenido.
+        </p>
+        <div class="hero-tag fu d2">Barcelona</div>
+      </div>
+      <div class="hero-photo-wrap fu d3">
+        <img class="hero-photo" src="profile_bw.png" alt="Mela Melitón" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ── S2: ESPECIALIDADES (dark) ── -->
+  <section class="slide slide--dark" id="s2">
+    <div class="expertise-inner">
+      <div class="section-label fu" data-i18n="s2.label">Especialidades</div>
+      <div class="expertise-grid">
+
+        <div class="expertise-item fu d1">
+          <div class="expertise-title" data-i18n="s2.i1.title">Producción<br/><span>Eventos en Vivo</span></div>
+          <div class="expertise-tags" data-i18n="s2.i1.tags">Conciertos · Conferencias · Summits<br/>Festivales · Retreats<br/>Europa · LATAM · Asia</div>
+        </div>
+
+        <div class="expertise-item fu d2">
+          <div class="expertise-title" data-i18n="s2.i2.title">Formato &<br/><span>Experiencia</span></div>
+          <div class="expertise-tags" data-i18n="s2.i2.tags">Curaduría · Narrativa<br/>Identidad Visual · Look & Feel<br/>Experiencia de Usuario · Agenda<br/>Merchandising</div>
+        </div>
+
+        <div class="expertise-item fu d3">
+          <div class="expertise-title" data-i18n="s2.i3.title">Operaciones<br/><span>& Logística</span></div>
+          <div class="expertise-tags" data-i18n="s2.i3.tags">Coordinación End-to-End<br/>Venues · Scouting Internacional<br/>Equipos Multidisciplinarios<br/>Presupuestos · Proveedores<br/>Gestión de Stakeholders · Flujos de Trabajo</div>
+        </div>
+
+        <div class="expertise-item fu d4">
+          <div class="expertise-title" data-i18n="s2.i4.title">Contenido<br/><span>& Broadcast</span></div>
+          <div class="expertise-tags" data-i18n="s2.i4.tags">Live Streaming · Podcast<br/>Comunicación Multiplataforma<br/>Branded Content</div>
+        </div>
+
+        <div class="expertise-item fu d5">
+          <div class="expertise-title" data-i18n="s2.i5.title">Gestión<br/><span>Artística</span></div>
+          <div class="expertise-tags" data-i18n="s2.i5.tags">Artistas · Speakers<br/>Hospitality · Backstage</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── S3: TRAYECTORIA (dark, acordeón interno) ── -->
+  <section class="slide slide--dark" id="s3">
+    <div class="trayec-inner">
+      <div class="section-label fu" style="padding-top: 80px; flex-shrink:0;" data-i18n="s3.label">Trayectoria</div>
+      <div class="trayec-scroll fu d1">
+
+        <div class="accord-item" onclick="toggleAccord(this)">
+          <div class="accord-header">
+            <div class="accord-dates">2025 – 2026</div>
+            <div class="accord-title-wrap">
+              <div class="accord-role" data-i18n="s3.j1.role">Events Manager</div>
+              <div class="accord-company" data-i18n="s3.j1.company">Polkadot Blockchain Academy — Worldwide</div>
+            </div>
+            <span class="accord-chevron">▼</span>
+          </div>
+          <div class="accord-body">
+            <ul class="accord-list" data-i18n="s3.j1.body">
+              <li>Producción integral de 2 ediciones del PBA Campus (Suiza e Indonesia): +200 participantes internacionales, 3 tracks académicos simultáneos y más de 10 actividades sociales por edición.</li>
+              <li>Coordinación logística end-to-end en dos continentes: scouting de venues, alojamiento, catering, transporte y gestión de proveedores locales.</li>
+              <li>Gestión de presupuesto y coordinación de equipos de hasta 20 personas en modalidad remote-first con múltiples husos horarios.</li>
+              <li>Supervisión de producción audiovisual, grabaciones, streaming y entregables multimedia para plataformas digitales.</li>
+              <li>Desarrollo de identidad visual, documentación operativa y reporting post-evento.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="accord-item" onclick="toggleAccord(this)">
+          <div class="accord-header">
+            <div class="accord-dates">2023 – 2025</div>
+            <div class="accord-title-wrap">
+              <div class="accord-role" data-i18n="s3.j2.role">Coordinador de Plataforma</div>
+              <div class="accord-company" data-i18n="s3.j2.company">Ibiza Global Radio — Ibiza</div>
+            </div>
+            <span class="accord-chevron">▼</span>
+          </div>
+          <div class="accord-body">
+            <ul class="accord-list" data-i18n="s3.j2.body">
+              <li>Coordinación de producción de contenidos para plataforma con audiencia global de 1M: 2 emisoras FM, canal de TV y plataforma de streaming.</li>
+              <li>Gestión de comunicación con artistas, DJs, hosts, periodistas y creadores externos, alineando dirección editorial y cronogramas.</li>
+              <li>Diseño y coordinación de programación, musicalización y guiones de contenido para las emisoras.</li>
+              <li>Coordinación de transmisiones en directo y cobertura audiovisual del festival anual.</li>
+              <li>Gestión del equipo técnico inhouse y logística de producción. (Simultáneo con adLIB! hasta Feb 2024)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="accord-item" onclick="toggleAccord(this)">
+          <div class="accord-header">
+            <div class="accord-dates">2022 – 2023</div>
+            <div class="accord-title-wrap">
+              <div class="accord-role" data-i18n="s3.j3.role">Head of Production</div>
+              <div class="accord-company" data-i18n="s3.j3.company">adLIB! — América Latina · Europa</div>
+            </div>
+            <span class="accord-chevron">▼</span>
+          </div>
+          <div class="accord-body">
+            <ul class="accord-list" data-i18n="s3.j3.body">
+              <li>Producción de 2 ediciones de campus académicos itinerantes y múltiples eventos en América Latina y Europa: presentaciones de producto, meetups, conferencias y retreats, hasta 500 asistentes.</li>
+              <li>Gestión integral de formato, espacios, contenidos, identidad visual, logística, hospitality y operación diaria.</li>
+              <li>Coordinación de equipos de hasta 20 personas, cronogramas, presupuestos y reporting post-evento.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="accord-item" onclick="toggleAccord(this)">
+          <div class="accord-header">
+            <div class="accord-dates">2021 – 2022</div>
+            <div class="accord-title-wrap">
+              <div class="accord-role" data-i18n="s3.j4.role">Coordinador de Producción</div>
+              <div class="accord-company" data-i18n="s3.j4.company">Accelerate Podcast — Facebook / Collage Agency</div>
+            </div>
+            <span class="accord-chevron">▼</span>
+          </div>
+          <div class="accord-body">
+            <ul class="accord-list" data-i18n="s3.j4.body">
+              <li>Coordinación integral de 11 episodios del podcast oficial de Facebook México para ejecutivos de empresas que utilizan herramientas de Meta.</li>
+              <li>Gestión de timelines, agendas, host, invitados de alto perfil, postproducción y distribución digital.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="accord-item" onclick="toggleAccord(this)">
+          <div class="accord-header">
+            <div class="accord-dates">2010 – 2020</div>
+            <div class="accord-title-wrap">
+              <div class="accord-role" data-i18n="s3.j5.role">Coordinador General</div>
+              <div class="accord-company" data-i18n="s3.j5.company">Delta 90.3 FM · Led.fm — Buenos Aires</div>
+            </div>
+            <span class="accord-chevron">▼</span>
+          </div>
+          <div class="accord-body">
+            <ul class="accord-list" data-i18n="s3.j5.body">
+              <li>Coordinación general de programación, musicalización y equipos artísticos, técnicos, operativos y comerciales de Delta 90.3 FM, incluyendo hosts y periodistas.</li>
+              <li>Producción de eventos en vivo, activaciones especiales y transmisiones en directo de conciertos y festivales.</li>
+              <li>Dirección artística y operativa en Led.fm: diseño de formato, programación y coordinación de equipos. (Simultáneo desde 2013)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="accord-item" onclick="toggleAccord(this)">
+          <div class="accord-header">
+            <div class="accord-dates">2007 – 2010</div>
+            <div class="accord-title-wrap">
+              <div class="accord-role" data-i18n="s3.j6.role">Productor de Eventos Culturales</div>
+              <div class="accord-company" data-i18n="s3.j6.company">Eurínome Agencia — Buenos Aires</div>
+            </div>
+            <span class="accord-chevron">▼</span>
+          </div>
+          <div class="accord-body">
+            <ul class="accord-list" data-i18n="s3.j6.body">
+              <li>Producción de eventos culturales para el Gobierno de la Provincia de Buenos Aires y la Ciudad Autónoma de Buenos Aires.</li>
+              <li>Coordinación artística, logística, hospitality y producción en vivo.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="accord-item" onclick="toggleAccord(this)">
+          <div class="accord-header">
+            <div class="accord-dates">2004 – 2007</div>
+            <div class="accord-title-wrap">
+              <div class="accord-role" data-i18n="s3.j7.role">Director Artístico</div>
+              <div class="accord-company" data-i18n="s3.j7.company">Kabul 107.9 FM & Spika 103.1 FM — Buenos Aires</div>
+            </div>
+            <span class="accord-chevron">▼</span>
+          </div>
+          <div class="accord-body">
+            <ul class="accord-list" data-i18n="s3.j7.body">
+              <li>Coordinación general de programación, musicalización y equipos artísticos, técnicos, operativos y comerciales, incluyendo hosts y periodistas.</li>
+              <li>Producción de eventos en vivo, activaciones especiales y transmisiones en directo de conciertos y festivales.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="accord-item" onclick="toggleAccord(this)">
+          <div class="accord-header">
+            <div class="accord-dates">2001 – 2004</div>
+            <div class="accord-title-wrap">
+              <div class="accord-role" data-i18n="s3.j8.role">Productor General</div>
+              <div class="accord-company" data-i18n="s3.j8.company">Metrodance 95.1 FM — Buenos Aires</div>
+            </div>
+            <span class="accord-chevron">▼</span>
+          </div>
+          <div class="accord-body">
+            <ul class="accord-list" data-i18n="s3.j8.body">
+              <li>Coordinación general de programación, musicalización y equipos artísticos, técnicos, operativos y comerciales, incluyendo hosts y periodistas.</li>
+              <li>Producción de eventos en vivo, activaciones especiales y transmisiones en directo de conciertos y festivales.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div><!-- /trayec-scroll -->
+    </div>
+  </section>
+
+  <!-- ── S4: SKILLS + CONTACTO (dark) ── -->
+  <section class="slide slide--dark" id="s4">
+    <div class="s4-inner">
+
+      <div class="section-label fu" style="padding-top: 80px; flex-shrink:0;" data-i18n="s4.skills.label">Recursos & Formación</div>
+
+      <div class="s4-scroll fu d1">
+
+        <div class="sk-grid">
+          <div class="sk-item">
+            <div class="sk-name" data-i18n="s4.sk1.name">Herramientas<br/><span>& IA</span></div>
+            <div class="sk-tags" data-i18n="s4.sk1.tags">Claude · Gemini · Higgsfield<br/>Notion · Asana · Canva<br/>Eventbrite · Google WS<br/>Discord · Slack</div>
+          </div>
+          <div class="sk-item">
+            <div class="sk-name" data-i18n="s4.sk2.name">Idiomas<br/><span>&nbsp;</span></div>
+            <div class="sk-tags" data-i18n="s4.sk2.tags">Español — Nativo<br/>Inglés — Profesional</div>
+          </div>
+          <div class="sk-item">
+            <div class="sk-name" data-i18n="s4.sk3.name">Formación<br/><span>Complementaria</span></div>
+            <div class="sk-tags-list" data-i18n="s4.sk3.tags">
+              <span>IA Esencial para el Día a Día — UPC (2025)</span>
+              <span>Inteligencia Empresarial — Adams Formación (2025–2026)</span>
+              <span>Creación de Contenidos con IA — Domestika (2023–2024)</span>
+              <span>Estrategia Full Funnel: FB & IG Ads — Domestika (2023–2024)</span>
+              <span>Community Manager — Convierte+ (2021)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sc-divider"></div>
+
+        <div class="sc-contact">
+          <div class="contact-availability" style="margin-bottom:24px;">
+            <span class="avail-dot"></span>
+            <span data-i18n="s4.availability">Disponible para proyectos locales e internacionales</span>
+          </div>
+          <div class="contact-links">
+            <a href="tel:+34627130818" class="contact-link">+34 627 130 818</a>
+            <a href="mailto:mela1000@gmail.com" class="contact-link">mela1000@gmail.com</a>
+          </div>
+        </div>
+
+      </div><!-- /s4-scroll -->
+    </div><!-- /s4-inner -->
+  </section>
+
+</div><!-- /scroll-wrap -->
+
+<script>
+  /* ────────────────────────────────────────
+     TRANSLATIONS
+  ──────────────────────────────────────── */
+  const T = {
+    es: {
+      'title':           'Mela Meliton — Productor de Eventos y Contenidos',
+      'hero.profession': 'Productor. Eventos y Contenido.',
+      's2.label':        'Especialidades',
+      's2.i1.title':     'Producción<br/><span>Eventos en Vivo</span>',
+      's2.i1.tags':      'Conciertos · Conferencias · Summits<br/>Festivales · Retreats<br/>Europa · LATAM · Asia',
+      's2.i2.title':     'Formato &<br/><span>Experiencia</span>',
+      's2.i2.tags':      'Curaduría · Narrativa<br/>Identidad Visual · Look & Feel<br/>Experiencia de Usuario · Agenda<br/>Merchandising',
+      's2.i3.title':     'Operaciones<br/><span>& Logística</span>',
+      's2.i3.tags':      'Coordinación End-to-End<br/>Venues · Scouting Internacional<br/>Equipos Multidisciplinarios<br/>Presupuestos · Proveedores<br/>Gestión de Stakeholders · Flujos de Trabajo',
+      's2.i4.title':     'Contenido<br/><span>& Broadcast</span>',
+      's2.i4.tags':      'Live Streaming · Podcast<br/>Comunicación Multiplataforma<br/>Branded Content',
+      's2.i5.title':     'Gestión<br/><span>Artística</span>',
+      's2.i5.tags':      'Artistas · Speakers<br/>Hospitality · Backstage',
+      's3.label':        'Trayectoria',
+      's3.j1.role':      'Events Manager',
+      's3.j1.company':   'Polkadot Blockchain Academy — Worldwide',
+      's3.j1.body':      '<li>Producción integral de 2 ediciones del PBA Campus (Suiza e Indonesia): +200 participantes internacionales, 3 tracks académicos simultáneos y más de 10 actividades sociales por edición.</li><li>Coordinación logística end-to-end en dos continentes: scouting de venues, alojamiento, catering, transporte y gestión de proveedores locales.</li><li>Gestión de presupuesto y coordinación de equipos de hasta 20 personas en modalidad remote-first con múltiples husos horarios.</li><li>Supervisión de producción audiovisual, grabaciones, streaming y entregables multimedia para plataformas digitales.</li><li>Desarrollo de identidad visual, documentación operativa y reporting post-evento.</li>',
+      's3.j2.role':      'Coordinador de Plataforma',
+      's3.j2.company':   'Ibiza Global Radio — Ibiza',
+      's3.j2.body':      '<li>Coordinación de producción de contenidos para plataforma con audiencia global de 1M: 2 emisoras FM, canal de TV y plataforma de streaming.</li><li>Gestión de comunicación con artistas, DJs, hosts, periodistas y creadores externos, alineando dirección editorial y cronogramas.</li><li>Diseño y coordinación de programación, musicalización y guiones de contenido para las emisoras.</li><li>Coordinación de transmisiones en directo y cobertura audiovisual del festival anual.</li><li>Gestión del equipo técnico inhouse y logística de producción. (Simultáneo con adLIB! hasta Feb 2024)</li>',
+      's3.j3.role':      'Head of Production',
+      's3.j3.company':   'adLIB! — América Latina · Europa',
+      's3.j3.body':      '<li>Producción de 2 ediciones de campus académicos itinerantes y múltiples eventos en América Latina y Europa: presentaciones de producto, meetups, conferencias y retreats, hasta 500 asistentes.</li><li>Gestión integral de formato, espacios, contenidos, identidad visual, logística, hospitality y operación diaria.</li><li>Coordinación de equipos de hasta 20 personas, cronogramas, presupuestos y reporting post-evento.</li>',
+      's3.j4.role':      'Coordinador de Producción',
+      's3.j4.company':   'Accelerate Podcast — Facebook / Collage Agency',
+      's3.j4.body':      '<li>Coordinación integral de 11 episodios del podcast oficial de Facebook México para ejecutivos de empresas que utilizan herramientas de Meta.</li><li>Gestión de timelines, agendas, host, invitados de alto perfil, postproducción y distribución digital.</li>',
+      's3.j5.role':      'Coordinador General',
+      's3.j5.company':   'Delta 90.3 FM · Led.fm — Buenos Aires',
+      's3.j5.body':      '<li>Coordinación general de programación, musicalización y equipos artísticos, técnicos, operativos y comerciales de Delta 90.3 FM, incluyendo hosts y periodistas.</li><li>Producción de eventos en vivo, activaciones especiales y transmisiones en directo de conciertos y festivales.</li><li>Dirección artística y operativa en Led.fm: diseño de formato, programación y coordinación de equipos. (Simultáneo desde 2013)</li>',
+      's3.j6.role':      'Productor de Eventos Culturales',
+      's3.j6.company':   'Eurínome Agencia — Buenos Aires',
+      's3.j6.body':      '<li>Producción de eventos culturales para el Gobierno de la Provincia de Buenos Aires y la Ciudad Autónoma de Buenos Aires.</li><li>Coordinación artística, logística, hospitality y producción en vivo.</li>',
+      's3.j7.role':      'Director Artístico',
+      's3.j7.company':   'Kabul 107.9 FM & Spika 103.1 FM — Buenos Aires',
+      's3.j7.body':      '<li>Coordinación general de programación, musicalización y equipos artísticos, técnicos, operativos y comerciales, incluyendo hosts y periodistas.</li><li>Producción de eventos en vivo, activaciones especiales y transmisiones en directo de conciertos y festivales.</li>',
+      's3.j8.role':      'Productor General',
+      's3.j8.company':   'Metrodance 95.1 FM — Buenos Aires',
+      's3.j8.body':      '<li>Coordinación general de programación, musicalización y equipos artísticos, técnicos, operativos y comerciales, incluyendo hosts y periodistas.</li><li>Producción de eventos en vivo, activaciones especiales y transmisiones en directo de conciertos y festivales.</li>',
+      's4.skills.label': 'Recursos & Formación',
+      's4.sk1.name':     'Herramientas<br/><span>& IA</span>',
+      's4.sk1.tags':     'Claude · Gemini · Higgsfield<br/>Notion · Asana · Canva<br/>Eventbrite · Google WS<br/>Discord · Slack',
+      's4.sk2.name':     'Idiomas<br/><span>&nbsp;</span>',
+      's4.sk2.tags':     'Español — Nativo<br/>Inglés — Profesional',
+      's4.sk3.name':     'Formación<br/><span>Complementaria</span>',
+      's4.sk3.tags':     '<span>IA Esencial para el Día a Día — UPC (2025)</span><span>Inteligencia Empresarial — Adams Formación (2025–2026)</span><span>Creación de Contenidos con IA — Domestika (2023–2024)</span><span>Estrategia Full Funnel: FB & IG Ads — Domestika (2023–2024)</span><span>Community Manager — Convierte+ (2021)</span>',
+      's4.availability': 'Disponible para proyectos locales e internacionales',
+    },
+    en: {
+      'title':           'Mela Meliton — Events Producer',
+      'hero.profession': 'Producer. Events & Content.',
+      's2.label':        'Expertise',
+      's2.i1.title':     'Live Event<br/><span>Production</span>',
+      's2.i1.tags':      'Concerts · Conferences · Summits<br/>Festivals · Retreats<br/>Europe · LATAM · Asia',
+      's2.i2.title':     'Format &<br/><span>Experience</span>',
+      's2.i2.tags':      'Curation · Narrative<br/>Visual Identity · Look & Feel<br/>User Experience · Agenda<br/>Merchandising',
+      's2.i3.title':     'Operations<br/><span>& Logistics</span>',
+      's2.i3.tags':      'End-to-End Coordination<br/>Venues · International Scouting<br/>Multidisciplinary Teams<br/>Budgets · Vendors<br/>Stakeholder Management · Workflows',
+      's2.i4.title':     'Content<br/><span>& Broadcast</span>',
+      's2.i4.tags':      'Live Streaming · Podcast<br/>Multiplatform Communication<br/>Branded Content',
+      's2.i5.title':     'Artist<br/><span>Management</span>',
+      's2.i5.tags':      'Artists · Speakers<br/>Hospitality · Backstage',
+      's3.label':        'Experience',
+      's3.j1.role':      'Events Manager',
+      's3.j1.company':   'Polkadot Blockchain Academy — Worldwide',
+      's3.j1.body':      '<li>Full production of 2 PBA Campus editions (Switzerland and Indonesia): 200+ international participants, 3 simultaneous academic tracks, and 10+ social activities per edition.</li><li>End-to-end logistics coordination across two continents: venue scouting, accommodation, catering, transportation, and local vendor management.</li><li>Budget management and coordination of teams of up to 20 people in remote-first mode across multiple time zones.</li><li>Oversight of audiovisual production, recordings, streaming, and multimedia deliverables for digital platforms.</li><li>Development of visual identity, operational documentation, and post-event reporting.</li>',
+      's3.j2.role':      'Platform Coordinator',
+      's3.j2.company':   'Ibiza Global Radio — Ibiza',
+      's3.j2.body':      '<li>Content production coordination for an international platform with a global audience of 1M: 2 FM stations, TV channel, and streaming platform.</li><li>Communication management with artists, DJs, hosts, journalists, and external creators, aligning editorial direction and schedules.</li><li>Design and coordination of programming, music selection, and content scripts for the stations.</li><li>Coordination of live broadcasts and audiovisual coverage of the annual festival.</li><li>Management of the in-house technical team and production logistics. (Simultaneous with adLIB! until Feb 2024)</li>',
+      's3.j3.role':      'Head of Production',
+      's3.j3.company':   'adLIB! — Latin America · Europe',
+      's3.j3.body':      '<li>Production of 2 editions of itinerant academic campuses and multiple events across Latin America and Europe: product launches, meetups, conferences, and retreats, with up to 500 attendees.</li><li>Full management of format, venues, content, visual identity, logistics, hospitality, and day-to-day operations.</li><li>Coordination of teams of up to 20 people, timelines, budgets, and post-event reporting.</li>',
+      's3.j4.role':      'Production Coordinator',
+      's3.j4.company':   'Accelerate Podcast — Facebook / Collage Agency',
+      's3.j4.body':      '<li>Full coordination of 11 episodes of Facebook Mexico\'s official podcast for executives of companies using Meta tools.</li><li>Management of timelines, schedules, hosts, high-profile guests, post-production, and digital distribution.</li>',
+      's3.j5.role':      'General Coordinator',
+      's3.j5.company':   'Delta 90.3 FM · Led.fm — Buenos Aires',
+      's3.j5.body':      '<li>General coordination of programming, music curation, and artistic, technical, operational, and commercial teams at Delta 90.3 FM, including hosts and journalists.</li><li>Live event production, special activations, and live broadcasts of concerts and festivals.</li><li>Artistic and operational direction at Led.fm: format design, programming, and team coordination. (Concurrent with Led.fm from 2013)</li>',
+      's3.j6.role':      'Cultural Events Producer',
+      's3.j6.company':   'Eurínome Agency — Buenos Aires',
+      's3.j6.body':      '<li>Cultural event production for the Government of the Province of Buenos Aires and the Autonomous City of Buenos Aires.</li><li>Artistic coordination, logistics, hospitality, and live production.</li>',
+      's3.j7.role':      'Artistic Director',
+      's3.j7.company':   'Kabul 107.9 FM & Spika 103.1 FM — Buenos Aires',
+      's3.j7.body':      '<li>General coordination of programming, music curation, and artistic, technical, operational, and commercial teams, including hosts and journalists.</li><li>Live event production, special activations, and live broadcasts of concerts and festivals.</li>',
+      's3.j8.role':      'General Producer',
+      's3.j8.company':   'Metrodance 95.1 FM — Buenos Aires',
+      's3.j8.body':      '<li>General coordination of programming, music curation, and artistic, technical, operational, and commercial teams, including hosts and journalists.</li><li>Live event production, special activations, and live broadcasts of concerts and festivals.</li>',
+      's4.skills.label': 'Resources & Training',
+      's4.sk1.name':     'Tools<br/><span>& AI</span>',
+      's4.sk1.tags':     'Claude · Gemini · Higgsfield<br/>Notion · Asana · Canva<br/>Eventbrite · Google WS<br/>Discord · Slack',
+      's4.sk2.name':     'Languages<br/><span>&nbsp;</span>',
+      's4.sk2.tags':     'Spanish — Native<br/>English — Professional',
+      's4.sk3.name':     'Further<br/><span>Education</span>',
+      's4.sk3.tags':     '<span>Essential AI for Daily Work — UPC (2025)</span><span>Business Intelligence — Adams Formación (2025–2026)</span><span>Content Creation with AI — Domestika (2023–2024)</span><span>Full Funnel Strategy: FB & IG Ads — Domestika (2023–2024)</span><span>Community Manager — Convierte+ (2021)</span>',
+      's4.availability': 'Available for local and international projects',
+    }
+  };
+
+  let currentLang = 'es';
+
+  function setLang(lang) {
+    currentLang = lang;
+    const dict = T[lang];
+
+    // title
+    document.title = dict['title'];
+
+    // html lang attr
+    document.getElementById('html-root').lang = lang;
+
+    // all data-i18n elements
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key] !== undefined) {
+        el.innerHTML = dict[key];
+      }
+    });
+
+    // toggle button states
+    document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+    // close any open accordions on lang switch
+    document.querySelectorAll('.accord-item.open').forEach(i => i.classList.remove('open'));
+  }
+
+  /* ────────────────────────────────────────
+     SCROLL / NAV
+  ──────────────────────────────────────── */
+  const dots    = document.querySelectorAll('.dot');
+  const navbar  = document.getElementById('navbar');
+  const dotsEl  = document.getElementById('slide-dots');
+  const counter = document.getElementById('slide-counter');
+  const slides  = document.querySelectorAll('.slide');
+  const TOTAL   = 4;
+  let currentSlide = 0;
+
+  const darkSlides = new Set([0, 1, 2, 3]);
+
+  function goTo(idx) {
+    const target = slides[idx];
+    if (target) window.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+  }
+
+  function updateNav(idx) {
+    const isDark = darkSlides.has(idx);
+    navbar.classList.toggle('light', !isDark);
+    dotsEl.classList.toggle('dark-dots', !isDark);
+    counter.classList.toggle('dark-counter', !isDark);
+    counter.textContent = String(idx + 1).padStart(2,'0') + ' / 0' + TOTAL;
+    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+  }
+
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    let idx = 0;
+    slides.forEach((s, i) => {
+      if (scrollY >= s.offsetTop - window.innerHeight / 2) idx = i;
+    });
+    if (idx !== currentSlide) { currentSlide = idx; updateNav(idx); }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); goTo(Math.min(currentSlide + 1, TOTAL - 1)); }
+    if (e.key === 'ArrowUp'   || e.key === 'PageUp')   { e.preventDefault(); goTo(Math.max(currentSlide - 1, 0)); }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End')  { e.preventDefault(); goTo(TOTAL - 1); }
+  });
+
+  /* ── Accordion ── */
+  function toggleAccord(item) {
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.accord-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  /* ── Fade-up observer ── */
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.fu').forEach(el => io.observe(el));
+
+
+  /* ── Cursor glow ── */
+</script>
+</body>
+</html>
